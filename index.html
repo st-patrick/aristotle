@@ -194,22 +194,30 @@
     }
 
 
-    var suggestionsCol = document.getElementById("suggestions");
 
-    var newElement;
-    for(let i = 0; i < content['suggestions'].length; i++) {
+
+    var newElement, bgImage;
+    var currentSection = 'suggestions';
+    var currentSectionCol = document.getElementById(currentSection);
+    for(let i = 0; i < content[currentSection].length; i++) {
+        
+        if (content[currentSection][i]['bgImage']) {
+            bgImage = 'style="background-image: url(img/' + content[currentSection][i]['bgImage'] + '); background-size: cover; background-position-x: center;"';
+        } else {
+            bgImage = '';
+        }
 
         newElement = "<div class=\"col-sm-3\">\n" +
-            "            <div class=\"card\">\n" +
-            "                <div class=\"card-body\" style=\"height: 14rem;\">\n" +
-            "                    <h5 class=\"card-title\" style=\"height: 3rem;\"> " + (content['suggestions'][i]['title'] ? content['suggestions'][i]['title'] : "longer title") + " </h5>\n" +
+            "            <div class=\"card\" " + bgImage + ">\n" +
+            "                <div class=\"card-body\" style=\"height: 14rem; backdrop-filter: blur(10px);\">\n" +
+            "                    <h5 class=\"card-title\" style=\"height: 3rem;\"> " + (content[currentSection][i]['title'] ? content[currentSection][i]['title'] : "longer title") + " </h5>\n" +
             "                    <p class=\"card-text\">With supporting text below as a natural lead-in to additional content.</p>\n" +
             "                    <a href=\"#\" class=\"btn btn-primary bottom\" style=\"position : absolute; bottom: 1rem;\">Go!</a>\n" +
             "                </div>\n" +
             "            </div>\n" +
-            "        </div>"
+            "        </div>";
 
-        suggestionsCol.innerHTML = suggestionsCol.innerHTML + newElement;
+        currentSectionCol.innerHTML = currentSectionCol.innerHTML + newElement;
     }
 
 
