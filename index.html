@@ -18,9 +18,7 @@
 
     <div class="row">
         <div class="col">
-            <h1>Welcome to Aristotle</h1>
-
-            Are you ready to get smarter by the minute?
+            <h1>Aristotle</h1>
         </div>
     </div>
 
@@ -33,7 +31,7 @@
     <!-- user bar with continue, notifications etc... -->
     <div class="row bg-light mb-5">
         <div class="col-3">
-            Hello, Patrick
+            Welcome back, Patrick
         </div>
         <div class="col-8">
             Continue: <a href="#">Principles of distributed systems</a> &nbsp; <a href="#">500 most used Spanish words</a>
@@ -90,61 +88,9 @@
     </div>
 
 
-    <!-- our suggestions for you -->
-    <div class="row mb-2">
-        <div class="col">
-            <h5>Our suggestions for you:</h5>
-        </div>
+    <div id="browse-content">
+        <!-- will be programmatically built by JavaScript out of data from array -->
     </div>
-    <div class="row mb-5" id="suggestions">
-      <!-- will be programmatically built by JavaScript out of data from array -->
-    </div>
-
-    <!-- what your friends are learning -->
-    <div class="row mb-2">
-        <div class="col">
-            <h5>Your friends are learning...</h5>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-3">
-            <div class="card" style="background-image: url(img/heart_beating.gif); background-size: cover; background-position-x: center;">
-                <div class="card-body" style="height: 14rem; backdrop-filter: blur(10px);">
-                    <h5 class="card-title" style="height: 3rem;">Anatomy of the heart</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary bottom" style="position : absolute; bottom: 1rem;">Go!</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="card">
-                <div class="card-body" style="height: 14rem;">
-                    <h5 class="card-title" style="height: 3rem;">Basics of Chinese</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary bottom" style="position : absolute; bottom: 1rem;">Go!</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="card">
-                <div class="card-body" style="height: 14rem;">
-                    <h5 class="card-title" style="height: 3rem;">Spanish idioms</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary bottom" style="position : absolute; bottom: 1rem;">Go!</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <div class="card">
-                <div class="card-body" style="height: 14rem;">
-                    <h5 class="card-title" style="height: 3rem;">Spanish idioms</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                    <a href="#" class="btn btn-primary bottom" style="position : absolute; bottom: 1rem;">Go!</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
 
     <div class="row mt-5 pt-5 mb-5">
@@ -172,53 +118,97 @@
 
 <script>
 
-    var content = {
-        'suggestions': [
-            {
+    var browseContent = {
+        'suggestions': {
+            'title': "Our suggestions for you",
+            'content': [{
                 'title': "Spanish idioms",
-
-            },
-            {},
-            {},
-            {}
-        ],
-        'social': [
-            {
-                'title': "Anatomy of the heart",
-
-            },
-            {},
-            {},
-            {}
-        ],
+                },
+                {},
+                {},
+                {}
+            ]},
+        'social': {
+            'title': "Your friends are learning...",
+            'content': [{
+                    'title': "Anatomy of the heart",
+                    'bgImage': "heart_beating.gif"
+                },
+                {},
+                {},
+                {}
+            ]},
+        'topic01': {
+            'title': "Popular in computer science",
+            'content': [
+                {},
+                {
+                'title': "How to do Hello World in C",
+                'bgImage': "c-programming.gif",
+                'bgFilters': "invert(1)"
+                },
+                {},
+                {}
+            ]},
+        'popScience': {
+            'title': "Pop science",
+            'content': [
+                {},
+                {
+                    'title': "Why the sky is blue",
+                },
+                {},
+                {}
+            ]},
     }
 
 
 
+    let browseContentContainer = document.getElementById("browse-content");
+    let newElement, newSection, bgImage, currentSectionCol, currentContent;
 
-    var newElement, bgImage;
-    var currentSection = 'suggestions';
-    var currentSectionCol = document.getElementById(currentSection);
-    for(let i = 0; i < content[currentSection].length; i++) {
-        
-        if (content[currentSection][i]['bgImage']) {
-            bgImage = 'style="background-image: url(img/' + content[currentSection][i]['bgImage'] + '); background-size: cover; background-position-x: center;"';
-        } else {
-            bgImage = '';
+    for (let section in browseContent) {
+
+        newSection = "<!-- what your friends are learning -->\n" +
+                "    <div class=\"row mb-2\">\n" +
+                "        <div class=\"col\">\n" +
+                "            <h5>" + browseContent[section]['title'] + "</h5>\n" +
+                "        </div>\n" +
+                "    </div>\n" +
+                "    <div class=\"row mb-5\" id=\"" + section + "\">\n" +
+                "        <!-- will be programmatically built by JavaScript out of data from array -->\n" +
+                "    </div>\n";
+
+        browseContentContainer.innerHTML += newSection;
+
+        currentSectionCol = document.getElementById(section);
+
+        for(let i = 0; i < browseContent[section]['content'].length; i++) {
+
+            currentContent = browseContent[section]['content'][i];
+
+            if (currentContent['bgImage']) {
+                bgImage = 'style="background-image: url(img/' + currentContent['bgImage'] + '); background-size: cover; background-position-x: center;"';
+            } else {
+                bgImage = '';
+            }
+
+            newElement = "<div class=\"col-sm-3\">\n" +
+                "            <div class=\"card\" " + bgImage + ">\n" +
+                "                <div class=\"card-body\" style=\"height: 14rem; backdrop-filter: blur(10px) " + (currentContent['bgFilters'] ? currentContent['bgFilters'] : "") + " ;\">\n" +
+                "                    <h5 class=\"card-title\" style=\"height: 3rem;\"> " + (currentContent['title'] ? currentContent['title'] : "longer title") + " </h5>\n" +
+                "                    <p class=\"card-text\">With supporting text below as a natural lead-in to additional content.</p>\n" +
+                "                    <a href=\"#\" class=\"btn btn-primary bottom\" style=\"position : absolute; bottom: 1rem;\">Go!</a>\n" +
+                "                </div>\n" +
+                "            </div>\n" +
+                "        </div>";
+
+            currentSectionCol.innerHTML += newElement;
         }
 
-        newElement = "<div class=\"col-sm-3\">\n" +
-            "            <div class=\"card\" " + bgImage + ">\n" +
-            "                <div class=\"card-body\" style=\"height: 14rem; backdrop-filter: blur(10px);\">\n" +
-            "                    <h5 class=\"card-title\" style=\"height: 3rem;\"> " + (content[currentSection][i]['title'] ? content[currentSection][i]['title'] : "longer title") + " </h5>\n" +
-            "                    <p class=\"card-text\">With supporting text below as a natural lead-in to additional content.</p>\n" +
-            "                    <a href=\"#\" class=\"btn btn-primary bottom\" style=\"position : absolute; bottom: 1rem;\">Go!</a>\n" +
-            "                </div>\n" +
-            "            </div>\n" +
-            "        </div>";
 
-        currentSectionCol.innerHTML = currentSectionCol.innerHTML + newElement;
     }
+
 
 
 </script>
