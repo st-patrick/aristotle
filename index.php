@@ -67,7 +67,7 @@
         echo '<div class="row">'.
                 '<div class="col">'.
                     '<hr>'.
-                    '<a class="h5" href="topic.php?'. $current_topic['id'] . '">' .$current_topic['name']. '</a>';
+                    '<a class="h5" href="topic.php?id='. $current_topic['id'] . '">' .$current_topic['name']. '</a>';
                 '</div>'.
             '</div>';
     }
