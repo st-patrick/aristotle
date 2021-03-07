@@ -35,7 +35,11 @@ $message = "";
 if(isset($_POST['SubmitButton'])){ //check if form was submitted
     $input = $_POST['inputText']; //get input text
 
-    $conn->query("INSERT INTO `topics` (`id`, `title`) VALUES (NULL, '". $input ."');");
+    // prepared statement to prevent SQL injection
+    $stmt = $conn->prepare('INSERT INTO `topics` (`id`, `title`) VALUES (NULL, ?);');
+    $stmt->bind_param('s', $input); // 's' specifies the variable type => 'string'
+
+    $stmt->execute();
 
     $message = "Success! You created the topic ".$input . "<br><br>";
 }

@@ -19,15 +19,52 @@
 $servername = "localhost";
 $username = "USER353865_admin";
 $password = "iabFDQvaczRfo8T6Aa2I";
+$database = "db_353865_6";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password);
+$conn = new mysqli($servername, $username, $password, $database);
 
 // Check connection
 if ($conn->connect_error) {
-die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
 echo "Connected successfully";
+
+// handle posting new topic ///////////
+$message = "";
+if(isset($_POST['SubmitButton'])){ //check if form was submitted
+    $input = $_POST['inputText']; //get input text
+
+    // prepared statement to prevent SQL injection
+    $stmt = $conn->prepare('INSERT INTO `topics` (`id`, `title`) VALUES (NULL, ?);');
+    $stmt->bind_param('s', $input); // 's' specifies the variable type => 'string'
+
+    $stmt->execute();
+
+    $message = "Success! You created the topic ".$input . "<br><br>";
+}
+
+
+// get topics ////////////////////
+
+$result = $conn->query("SELECT * FROM `explanations` WHERE topic_id=1 ;");
+
+if ($result->num_rows > 0) {
+    printf("Select returned %d rows.\n", $result->num_rows);
+
+    $result_array = $result->fetch_all(MYSQLI_ASSOC);
+    print_r($result_array);
+} else {
+    echo "0 results";
+}
+$conn->close();
+
+
+//TODO use google safe browsing API to check against malicious URLs
+//TODO if an actual URL was posted (and not javascript, a string or other stuff we don't want)
+//TODO possibility to report URLs
+
+
 
 ?>
 
@@ -41,11 +78,26 @@ echo "Connected successfully";
         </div>
     </div>
 
+
     <div class="row">
         <div class="col">
-            <a href="#">post answer</a>
+            <a href="#" onclick="document.getElementById('post-explanation-row').classList.remove('d-none');">post an explanation</a>
         </div>
     </div>
+
+    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="post-explanation-row">
+        <div class="col">
+            <?php echo $message; ?>
+            Found a good explanation? Paste the URL here:<br>
+            <form action="" method="post">
+                <input type="url" name="inputText"/>
+                <input type="submit" name="SubmitButton" value="post explanation now"/>
+            </form>
+            <br>
+            <a href="#" onclick="document.getElementById('post-explanation-row').classList.add('d-none');">hide form</a>
+        </div>
+    </div>
+
 
 
     <div id="content-goes-here">
@@ -136,10 +188,8 @@ echo "Connected successfully";
                 <div class="col">
                 <hr>
                 <i class="bi bi-caret-up" onclick="vote(` + i + `, true)"></i>
-                <i class="bi bi-caret-down" onclick="vote(` + i + `, false)"></i>&nbsp;&nbsp;
                 ` + current_content['upvotes'] + `&nbsp;&nbsp;
                 <a class="h5" target="_blank" href="` + current_content['link'] + `">` + current_content['name'] + `</a>
-                &nbsp;&nbsp; <small>report</small>
                 </div>
             </div>`;
 
