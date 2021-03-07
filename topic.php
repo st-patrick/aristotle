@@ -13,7 +13,23 @@
 </head>
 <body>
 
-<img src="img/aristotle-bust.jpg"  width="50px" style="position:fixed; left:0; top:0;">
+<?php
+
+// let's connect to our remote database
+$servername = "localhost";
+$username = "USER353865_admin";
+$password = "iabFDQvaczRfo8T6Aa2I";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password);
+
+// Check connection
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
+echo "Connected successfully";
+
+?>
 
 
 <div class="container">
@@ -21,51 +37,20 @@
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h6">Aristotle</h1>
-            <hr>
-        </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col">
-            <h4>Computer Science & Data Structures</h4>
+            <h1 class="h3">HashTable</h1>
         </div>
     </div>
 
     <div class="row">
         <div class="col">
-            <a href="#">create topic</a>
+            <a href="#">post answer</a>
         </div>
     </div>
+
 
     <div id="content-goes-here">
         <br>
     </div>
-
-
-    <?php
-
-    $topic = [
-        "content" => [
-            [
-                "name" => "How HashMap Works : A missing piece of hood.",
-                "link" => "https://medium.com/zero-equals-false/how-hashmap-works-a-missing-piece-of-hood-29dd28c4c01e",
-                "id" => 1,
-                "upvotes" => 3000,
-                "suggestions" => 5
-            ],
-            [
-                "name" => "Data Structures: Hash Tables - YouTube",
-                "link" => "https://www.youtube.com/watch?v=shs0KM3wKv8",
-                "id" => 2,
-                "upvotes" => 3000,
-                "suggestions" => 5
-            ],
-        ],
-    ];
-
-    ?>
 
 
     <div class="row mt-5 pt-5 mb-5">
@@ -93,6 +78,29 @@
     var topic = {};
 
     <?php
+
+
+    // TODO get this programmatically from the backend database
+    $topic = [
+        "content" => [
+            [
+                "name" => "How HashMap Works : A missing piece of hood.",
+                "link" => "https://medium.com/zero-equals-false/how-hashmap-works-a-missing-piece-of-hood-29dd28c4c01e",
+                "id" => 1,
+                "upvotes" => 234,
+                "user_voted_for_this" => 0
+            ],
+            [
+                "name" => "Data Structures: Hash Tables - YouTube",
+                "link" => "https://www.youtube.com/watch?v=shs0KM3wKv8",
+                "id" => 2,
+                "upvotes" => 167,
+                "user_voted_for_this" => 0
+            ],
+        ],
+    ];
+
+
     $js_array = json_encode($topic);
     echo "topic = ". $js_array . ";\n";
     ?>
@@ -102,14 +110,19 @@
 
 
 
+    // TODO enable both up and downvote and then store information
     function vote(id, up) {
-        if(up) {
-            topic['content'][id]['upvotes']++;
-        } else {
-            topic['content'][id]['upvotes']--;
-        }
+        if(topic['content'][id]['user_voted_for_this'] == 0) {
+            if(up) {
+                topic['content'][id]['user_voted_for_this'] = 1;
+            } else {
+                topic['content'][id]['user_voted_for_this'] = -1;
+            }
 
-        rerender();
+            topic['content'][id]['upvotes'] += topic['content'][id]['user_voted_for_this'];
+
+            rerender();
+        }
     }
 
     function rerender() {
@@ -126,7 +139,7 @@
                 <i class="bi bi-caret-down" onclick="vote(` + i + `, false)"></i>&nbsp;&nbsp;
                 ` + current_content['upvotes'] + `&nbsp;&nbsp;
                 <a class="h5" target="_blank" href="` + current_content['link'] + `">` + current_content['name'] + `</a>
-                &nbsp;&nbsp; no comments &nbsp;&nbsp; hide
+                &nbsp;&nbsp; <small>report</small>
                 </div>
             </div>`;
 

@@ -13,7 +13,49 @@
 </head>
 <body>
 
-<img src="img/aristotle-bust.jpg"  width="50px" style="position:fixed; left:0; top:0;">
+<?php
+
+// let's connect to our remote database
+$servername = "localhost";
+$username = "USER353865_admin";
+$password = "iabFDQvaczRfo8T6Aa2I";
+$database = "db_353865_6";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+echo "Connected successfully";
+
+// handle posting new topic ///////////
+$message = "";
+if(isset($_POST['SubmitButton'])){ //check if form was submitted
+    $input = $_POST['inputText']; //get input text
+
+    $conn->query("INSERT INTO `topics` (`id`, `title`) VALUES (NULL, '". $input ."');");
+
+    $message = "Success! You created the topic ".$input . "<br><br>";
+}
+
+
+// get topics ////////////////////
+
+$result = $conn->query("SELECT * FROM `topics`;");
+
+if ($result->num_rows > 0) {
+    printf("Select returned %d rows.\n", $result->num_rows);
+
+    $result_array = $result->fetch_all(MYSQLI_ASSOC);
+    print_r($result_array);
+} else {
+    echo "0 results";
+}
+$conn->close();
+
+?>
 
 
 <div class="container">
@@ -21,21 +63,26 @@
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h6">Aristotle</h1>
-            <hr>
-        </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col">
-            <h4>Beuth Hochschule Berlin >> Medieninformatik >> Algorithmen und Datenstrukturen</h4>
+            <h1 class="h3">Please explain _______ to me</h1>
         </div>
     </div>
 
     <div class="row">
         <div class="col">
-            <a href="#">create topic</a>
+            <a href="#" onclick="document.getElementById('create-topic-row').classList.remove('d-none');">create topic</a>
+        </div>
+    </div>
+
+    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="create-topic-row">
+        <div class="col">
+            <?php echo $message; ?>
+            Ok, let's create a new topic. Enter the title you want your topic to appear under:<br>
+            <form action="" method="post">
+                <input type="text" name="inputText"/>
+                <input type="submit" name="SubmitButton" value="create topic now"/>
+            </form>
+            <br>
+            <a href="#" onclick="document.getElementById('create-topic-row').classList.add('d-none');">hide form</a>
         </div>
     </div>
 
@@ -43,6 +90,7 @@
 
     <?php
 
+    /*
     $course = [
         "topics" => [
             [
@@ -58,16 +106,18 @@
                 "suggestions" => 5
             ],
         ],
-    ];
+    ];*/
+
+    $topics = $result_array;
 
 
-    for($i = 0; $i < count($course['topics']); $i++) {
-        $current_topic = $course['topics'][$i];
+    for($i = 0; $i < count($topics); $i++) {
+        $current_topic = $topics[$i];
 
         echo '<div class="row">'.
                 '<div class="col">'.
                     '<hr>'.
-                    '<a class="h5" href="topic.php?id='. $current_topic['id'] . '">' .$current_topic['name']. '</a>';
+                    '<a class="h5" href="topic.php?id='. $current_topic['id'] . '">' .$current_topic['title']. '</a>';
                 '</div>'.
             '</div>';
     }
