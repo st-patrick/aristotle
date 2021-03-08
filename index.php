@@ -28,7 +28,6 @@ $conn = new mysqli($servername, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-echo "Connected successfully";
 
 // handle posting new topic ///////////
 $message = "";
@@ -50,10 +49,7 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 $result = $conn->query("SELECT * FROM `topics`;");
 
 if ($result->num_rows > 0) {
-    printf("Select returned %d rows.\n", $result->num_rows);
-
     $result_array = $result->fetch_all(MYSQLI_ASSOC);
-    print_r($result_array);
 } else {
     echo "0 results";
 }

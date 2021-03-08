@@ -28,35 +28,51 @@ $conn = new mysqli($servername, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-echo "Connected successfully";
+
+// which topic are we on?
+if(isset($_GET['id'])) { //check if topic id is set
+    // TODO validate id
+
+    $topic_id = intval($_GET['id']);
+}
+
 
 // handle posting new topic ///////////
 $message = "";
 if(isset($_POST['SubmitButton'])){ //check if form was submitted
-    $input = $_POST['inputText']; //get input text
+
+    //get input texts
+    $url = $_POST['url'];
+    $title = $_POST['title'];
+
+    echo "hello" . $url . $title . $topic_id;
 
     // prepared statement to prevent SQL injection
-    $stmt = $conn->prepare('INSERT INTO `topics` (`id`, `title`) VALUES (NULL, ?);');
-    $stmt->bind_param('s', $input); // 's' specifies the variable type => 'string'
+    $stmt = $conn->prepare('INSERT INTO `explanations` (`id`, `topic_id`, `url`, `upvotes`, `title`) VALUES (NULL, ?, ?, 0, ?);');
+    $stmt->bind_param('iss', $topic_id, $url, $title); // 's' specifies the variable type => 'string'
 
     $stmt->execute();
 
-    $message = "Success! You created the topic ".$input . "<br><br>";
+    $message = "Success! You created the topic ".$title . "<br><br>";
 }
 
 
 // get topics ////////////////////
 
-$result = $conn->query("SELECT * FROM `explanations` WHERE topic_id=1 ;");
 
-if ($result->num_rows > 0) {
-    printf("Select returned %d rows.\n", $result->num_rows);
 
-    $result_array = $result->fetch_all(MYSQLI_ASSOC);
-    print_r($result_array);
-} else {
-    echo "0 results";
-}
+// prepared statement to prevent SQL injection
+$model_trim = [];
+
+$stmt = $conn->prepare("SELECT `id`, `title`, `upvotes`, `url` FROM `explanations` WHERE `topic_id` = ? ;");
+$stmt->bind_param('i', $topic_id); // 'i' specifies the variable type => 'integer'
+$stmt->execute();
+
+// Extract result set and loop rows
+$result = $stmt->get_result();
+$data = $result->fetch_all(MYSQLI_ASSOC);
+
+$stmt->close();
 $conn->close();
 
 
@@ -90,7 +106,10 @@ $conn->close();
             <?php echo $message; ?>
             Found a good explanation? Paste the URL here:<br>
             <form action="" method="post">
-                <input type="url" name="inputText"/>
+                <input type="url" name="url"/><br>
+                <br>
+                And then the title you want to appear here:<br>
+                <input type="text" name="title"/><br>
                 <input type="submit" name="SubmitButton" value="post explanation now"/>
             </form>
             <br>
@@ -127,34 +146,17 @@ $conn->close();
 -->
 
 <script type='text/javascript'>
-    var topic = {};
+    var explanations = {};
 
     <?php
 
 
     // TODO get this programmatically from the backend database
-    $topic = [
-        "content" => [
-            [
-                "name" => "How HashMap Works : A missing piece of hood.",
-                "link" => "https://medium.com/zero-equals-false/how-hashmap-works-a-missing-piece-of-hood-29dd28c4c01e",
-                "id" => 1,
-                "upvotes" => 234,
-                "user_voted_for_this" => 0
-            ],
-            [
-                "name" => "Data Structures: Hash Tables - YouTube",
-                "link" => "https://www.youtube.com/watch?v=shs0KM3wKv8",
-                "id" => 2,
-                "upvotes" => 167,
-                "user_voted_for_this" => 0
-            ],
-        ],
-    ];
+    $explanations = $data;
 
 
-    $js_array = json_encode($topic);
-    echo "topic = ". $js_array . ";\n";
+    $js_array = json_encode($explanations);
+    echo "explanations = ". $js_array . ";\n";
     ?>
 
     let topic_container = document.getElementById('content-goes-here');
@@ -164,24 +166,22 @@ $conn->close();
 
     // TODO enable both up and downvote and then store information
     function vote(id, up) {
-        if(topic['content'][id]['user_voted_for_this'] == 0) {
             if(up) {
-                topic['content'][id]['user_voted_for_this'] = 1;
+                explanations[id]['user_voted_for_this'] = 1;
             } else {
-                topic['content'][id]['user_voted_for_this'] = -1;
+                explanations[id]['user_voted_for_this'] = -1;
             }
 
-            topic['content'][id]['upvotes'] += topic['content'][id]['user_voted_for_this'];
+            explanations[id]['upvotes'] += explanations[id]['user_voted_for_this'];
 
             rerender();
-        }
     }
 
     function rerender() {
         topic_container.innerHTML = "";
 
-        for(let i = 0; i < topic['content'].length; i++) {
-            let current_content = topic['content'][i];
+        for(let i = 0; i < explanations.length; i++) {
+            let current_content = explanations[i];
 
             let new_topic_html = `
             <div class="row">
@@ -189,7 +189,7 @@ $conn->close();
                 <hr>
                 <i class="bi bi-caret-up" onclick="vote(` + i + `, true)"></i>
                 ` + current_content['upvotes'] + `&nbsp;&nbsp;
-                <a class="h5" target="_blank" href="` + current_content['link'] + `">` + current_content['name'] + `</a>
+                <a class="h5" target="_blank" href="` + current_content['url'] + `">` + current_content['title'] + `</a>
                 </div>
             </div>`;
 
