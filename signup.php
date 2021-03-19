@@ -65,13 +65,7 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3">Please explain _______ to me</h1>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <a href="#" onclick="document.getElementById('create-topic-row').classList.remove('d-none');">create topic</a>
+            <h1 class="h3">Signup</h1>
         </div>
     </div>
 
