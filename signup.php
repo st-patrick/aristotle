@@ -73,57 +73,34 @@ $conn->close();
         </div>
     </div>
 
-    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="create-topic-row">
+    <div class="row mt-3 mb-3 py-3 bg-light" id="create-topic-row">
         <div class="col">
             <?php echo $message; ?>
-            Ok, let's create a new topic. Enter the title you want your topic to appear under:<br>
+            Ok, let's get you signed up<br>
+            <br><br>
             <form action="" method="post">
-                <input type="text" name="inputText"/>
-                <input type="submit" name="SubmitButton" value="create topic now"/>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    <div id="emailHelp" class="form-text">We'll never share your user details with anyone else.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1">
+                    <div id="passwordHelp" class="form-text">Your password is stored encrypted in a way we can't even know what it is.</div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1"><?php echo (bool)random_int(0, 1) ? "" : "don't"; ?> check this box</label>
+                </div>
+                <input type="submit" name="SubmitButton" class="btn btn-primary" value="Sign up now" />
             </form>
-            <br>
-            <a href="#" onclick="document.getElementById('create-topic-row').classList.add('d-none');">hide form</a>
         </div>
     </div>
 
 
 
-    <?php
-
-    /*
-    $course = [
-        "topics" => [
-            [
-                "name" => "Hash Tables",
-                "id" => 1,
-                "upvotes" => 3000,
-                "suggestions" => 5
-            ],
-            [
-                "name" => "LinkedLists",
-                "id" => 2,
-                "upvotes" => 3000,
-                "suggestions" => 5
-            ],
-        ],
-    ];*/
-
-    $topics = $result_array;
-
-
-    for($i = 0; $i < count($topics); $i++) {
-        $current_topic = $topics[$i];
-
-        echo '<div class="row">'.
-                '<div class="col">'.
-                    '<hr>'.
-                    '<a class="h5" href="topic.php?id='. $current_topic['id'] . '&title='. $current_topic['title'] .'">' .$current_topic['title']. '</a>';
-                '</div>'.
-            '</div>';
-    }
-
-
-    ?>
 
 
     <div class="row mt-5 pt-5 mb-5">

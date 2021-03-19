@@ -9,11 +9,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
-    <title>Aristotle Home</title>
+    <title>Aristotle: find the best educational content</title>
 </head>
 <body>
 
 <?php
+
+// TODO use URL rewrite to be able to see topic in actual URL, not GET vars
 
 // let's connect to our remote database
 $servername = "localhost";
@@ -34,6 +36,11 @@ if(isset($_GET['id'])) { //check if topic id is set
     // TODO validate id
 
     $topic_id = intval($_GET['id']);
+
+    // TODO is it possible that we will some day have id 0?
+    if ($topic_id == 0) {
+        die("invalid topic ID");
+    }
 }
 
 
@@ -57,9 +64,8 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 }
 
 
+
 // get topics ////////////////////
-
-
 
 // prepared statement to prevent SQL injection
 $model_trim = [];
@@ -90,7 +96,7 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3">HashTable</h1>
+            <h1 class="h3"><?php echo $_GET['title']; ?></h1>
         </div>
     </div>
 
@@ -183,6 +189,7 @@ $conn->close();
         for(let i = 0; i < explanations.length; i++) {
             let current_content = explanations[i];
 
+            // TODO click on upvote needs to be an API call or sth AJAXy that calls a php file to store upvote in conjunction table
             let new_topic_html = `
             <div class="row">
                 <div class="col">
