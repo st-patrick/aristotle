@@ -1,3 +1,11 @@
+<?php
+
+// Initialize the session
+session_start();
+echo $_SESSION["test"];
+
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -44,7 +52,7 @@ if(isset($_GET['id'])) { //check if topic id is set
 }
 
 
-// handle posting new topic ///////////
+// handle posting new explanation ///////////
 $message = "";
 if(isset($_POST['SubmitButton'])){ //check if form was submitted
 
@@ -61,6 +69,39 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
     $stmt->execute();
 
     $message = "Success! You created the topic ".$title . "<br><br>";
+} elseif (isset($_POST['upvote'])) {
+
+    // make sure only logged in users can upvote
+    if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] == false) {
+        echo "you must be logged in to upvote";
+    } else {
+
+        // DONE check if user has already upvoted this question
+        $stmt = $conn->prepare("SELECT * FROM `junction_explanations_users-who-voted` WHERE (`explanation_id`,`user_id`) = (?,?) ;");
+        $stmt->bind_param('ii', $_POST['upvote'], $_SESSION['id']); // 'i' specifies the variable type => 'integer'
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        // DONE if result is not empty, cancel upvote
+        if ($result->num_rows > 0) {
+            echo "you already upvoted this explanation";
+        } else {
+
+            $stmt = $conn->prepare('UPDATE explanations SET upvotes = upvotes + 1 WHERE id = ?');
+            $stmt->bind_param('i', $_POST['upvote']); // 's' specifies the variable type => 'string'
+            $stmt->execute();
+
+            // update conjunction table to only allow 1 upvote per user
+            $stmt = $conn->prepare('INSERT INTO `junction_explanations_users-who-voted` (`explanation_id`,`user_id`) VALUES (?, ?);');
+            $stmt->bind_param('ii', $_POST['upvote'], $_SESSION['id']); // 's' specifies the variable type => 'string'
+            $stmt->execute();
+
+            echo "you upvoted explanation with id ".$_POST['upvote'];
+        }
+
+    }
+
 }
 
 
@@ -68,8 +109,6 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 // get topics ////////////////////
 
 // prepared statement to prevent SQL injection
-$model_trim = [];
-
 $stmt = $conn->prepare("SELECT `id`, `title`, `upvotes`, `url` FROM `explanations` WHERE `topic_id` = ? ;");
 $stmt->bind_param('i', $topic_id); // 'i' specifies the variable type => 'integer'
 $stmt->execute();
@@ -133,7 +172,10 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
+            <a href="signup.php">sign up</a><br>
+            <a href="login.php">login</a><br>
             This is the footer<br>
+            Copyright Aristotle<br>
         </div>
     </div>
 
@@ -194,7 +236,10 @@ $conn->close();
             <div class="row">
                 <div class="col">
                 <hr>
-                <i class="bi bi-caret-up" onclick="vote(` + i + `, true)"></i>
+                <form action=""  method="post" class="d-none" id="upvote`+ current_content['id'] +`">
+                    <input type="number" value="`+ current_content['id'] +`" name="upvote"/>
+                </form>
+                <i class="bi bi-caret-up" onclick="vote(` + i + `, true); document.getElementById('upvote`+ current_content['id'] +`').submit();"></i>
                 ` + current_content['upvotes'] + `&nbsp;&nbsp;
                 <a class="h5" target="_blank" href="` + current_content['url'] + `">` + current_content['title'] + `</a>
                 </div>
