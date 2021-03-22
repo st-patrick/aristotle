@@ -102,9 +102,10 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
+            <a href="signup.php">sign up</a><br>
+            <a href="login.php">login</a><br>
             This is the footer<br>
             Copyright Aristotle<br>
-
         </div>
     </div>
 

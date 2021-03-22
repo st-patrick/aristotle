@@ -1,19 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-
-    <title>Explain ______ to me</title>
-</head>
-<body>
-
 <?php
+
+session_start();
 
 // let's connect to our remote database
 $servername = "localhost";
@@ -34,31 +21,66 @@ $message = "";
 if(isset($_POST['SubmitButton'])){ //check if form was submitted
     $submitted_username = $_POST['username']; //get username from form
     $submitted_password = $_POST['password']; //get password from form
-    $hash = password_hash($submitted_password, PASSWORD_DEFAULT);
+
+    // TODO why is the password hash different every time??? SALT
 
     // prepared statement to prevent SQL injection
-    $stmt = $conn->prepare('INSERT INTO `users` (`id`, `username`, `password-hash`) VALUES (NULL, ?, ?);');
-    $stmt->bind_param('ss', $submitted_username, $hash); // 's' specifies the variable type => 'string'
+    $stmt = $conn->prepare('SELECT `username`, `password-hash`, `id` FROM `users` WHERE `username` = ?;');
+    $stmt->bind_param('s', $submitted_username); // 's' specifies the variable type => 'string'
 
     $stmt->execute();
 
-    $message = "Success! You created your account under the username ".$submitted_username . "<br><br>";
+    // Extract result set and loop rows
+    $result = $stmt->get_result();
+    $data = $result->fetch_all(MYSQLI_ASSOC);
+
+    $correct = password_verify($submitted_password, $data[0]['password-hash']);
+    if ($correct) {
+        echo "logged in bitch";
+
+        // Store data in session variables
+        $_SESSION["loggedin"] = true;
+        $_SESSION["id"] = $data[0]['id'];
+        $_SESSION["username"] = $data[0]['username'];
+
+        echo $_SESSION["loggedin"];
+        echo $_SESSION["id"];
+        echo $_SESSION["username"];
+
+        // Redirect user to welcome page
+        //header("location: index.php");
+    }
+
+    $stmt->close();
+
+    print_r($data);
+
+    $message = "Success! You logged in under the username ".$submitted_username . "<br><br>";
 }
 
 
-// get topics ////////////////////
 
-$result = $conn->query("SELECT * FROM `topics`;");
-
-if ($result->num_rows > 0) {
-    $result_array = $result->fetch_all(MYSQLI_ASSOC);
-} else {
-    echo "0 results";
-}
 $conn->close();
+
 
 ?>
 
+
+
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <title>Explain ______ to me</title>
+</head>
+<body>
 
 <div class="container">
 
@@ -71,26 +93,21 @@ $conn->close();
 
     <div class="row mt-3 mb-3 py-3 bg-light" id="create-topic-row">
         <div class="col">
-            <?php echo $message; ?>
-            Ok, let's get you signed up<br>
-            <br><br>
             <form action="" method="post">
                 <div class="mb-3">
                     <label for="exampleInputUsername" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="exampleInputUsername" aria-describedby="usernameHelp" name="username">
-                    <div id="usernameHelp" class="form-text">We'll never share your user details with anyone else.</div>
+                    <input type="text" class="form-control" id="exampleInputUsername" name="username">
                 </div>
                 <div class="mb-3">
                     <label for="exampleInputPassword1" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1" aria-describedby="passwordHelp" name="password">
-                    <div id="passwordHelp" class="form-text">Your password is stored encrypted in a way we can't even know what it is.</div>
+                    <input type="password" class="form-control" id="exampleInputPassword1" name="password">
                 </div>
 
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="exampleCheck1">
                     <label class="form-check-label" for="exampleCheck1"><?php echo (bool)random_int(0, 1) ? "" : "don't"; ?> check this box</label>
                 </div>
-                <input type="submit" name="SubmitButton" class="btn btn-primary" value="Sign up now" />
+                <input type="submit" name="SubmitButton" class="btn btn-primary" value="Login" />
             </form>
         </div>
     </div>
@@ -102,9 +119,10 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
+            <a href="signup.php">sign up</a><br>
+            <a href="login.php">login</a><br>
             This is the footer<br>
             Copyright Aristotle<br>
-
         </div>
     </div>
 

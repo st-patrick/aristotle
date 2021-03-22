@@ -1,3 +1,22 @@
+<?php
+
+// Initialize the session
+session_start();
+
+
+// Check if the user is logged in, if not then redirect him to login page
+if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+
+    echo "not logged in";
+
+    //header("location: login.php");
+    //exit;
+} else {
+        echo "logged in as ". $_SESSION["username"];
+}
+
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,6 +33,7 @@
 <body>
 
 <?php
+
 
 // let's connect to our remote database
 $servername = "localhost";
@@ -129,9 +149,10 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
+            <a href="signup.php">sign up</a><br>
+            <a href="login.php">login</a><br>
             This is the footer<br>
             Copyright Aristotle<br>
-
         </div>
     </div>
 
