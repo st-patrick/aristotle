@@ -36,32 +36,23 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 
     $correct = password_verify($submitted_password, $data[0]['password-hash']);
     if ($correct) {
-        echo "logged in bitch";
 
         // Store data in session variables
         $_SESSION["loggedin"] = true;
         $_SESSION["id"] = $data[0]['id'];
         $_SESSION["username"] = $data[0]['username'];
 
-        echo $_SESSION["loggedin"];
-        echo $_SESSION["id"];
-        echo $_SESSION["username"];
+        $stmt->close();
+        $conn->close();
 
         // Redirect user to welcome page
-        //header("location: index.php");
+        header("location: index.php");
     }
 
     $stmt->close();
 
-    print_r($data);
-
-    $message = "Success! You logged in under the username ".$submitted_username . "<br><br>";
 }
-
-
-
 $conn->close();
-
 
 ?>
 
