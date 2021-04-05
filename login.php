@@ -78,7 +78,7 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3">Please explain _______ to me >> Login</h1>
+            <h1 class="h3"><a href="/index.php">Aristotle</a></h1><h1 class="h3"> >> Login</h1>
         </div>
     </div>
 

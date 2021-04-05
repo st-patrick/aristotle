@@ -60,7 +60,7 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
     $url = $_POST['url'];
     $title = $_POST['title'];
 
-    echo "hello" . $url . $title . $topic_id;
+    echo "new explanation successfully posted: ".$title;
 
     // prepared statement to prevent SQL injection
     $stmt = $conn->prepare('INSERT INTO `explanations` (`id`, `topic_id`, `url`, `upvotes`, `title`) VALUES (NULL, ?, ?, 0, ?);');
@@ -135,7 +135,7 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3"><?php echo $_GET['title']; ?></h1>
+            <h1 class="h3"><a href="/index.php">Aristotle</a></h1><h1 class="h3"> >> <?php echo $_GET['title']; ?></h1>
         </div>
     </div>
 
