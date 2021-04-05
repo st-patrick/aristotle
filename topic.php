@@ -1,8 +1,6 @@
 <?php
 
-// Initialize the session
-session_start();
-echo $_SESSION["test"];
+include "basic_info.php";
 
 ?>
 
@@ -17,7 +15,7 @@ echo $_SESSION["test"];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
-    <title>Aristotle: find the best educational content</title>
+    <title><?php echo $platform_title; ?></title>
 </head>
 <body>
 
@@ -26,10 +24,6 @@ echo $_SESSION["test"];
 // TODO use URL rewrite to be able to see topic in actual URL, not GET vars
 
 // let's connect to our remote database
-$servername = "localhost";
-$username = "USER353865_admin";
-$password = "iabFDQvaczRfo8T6Aa2I";
-$database = "db_353865_6";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $database);
@@ -39,14 +33,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// which topic are we on?
+// which collection are we on?
 if(isset($_GET['id'])) { //check if topic id is set
     // TODO validate id
 
-    $topic_id = intval($_GET['id']);
+    $collection_id = intval($_GET['id']);
 
     // TODO is it possible that we will some day have id 0?
-    if ($topic_id == 0) {
+    if ($collection_id == 0) {
         die("invalid topic ID");
     }
 }
@@ -63,55 +57,30 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
     echo "new explanation successfully posted: ".$title;
 
     // prepared statement to prevent SQL injection
-    $stmt = $conn->prepare('INSERT INTO `explanations` (`id`, `topic_id`, `url`, `upvotes`, `title`) VALUES (NULL, ?, ?, 0, ?);');
-    $stmt->bind_param('iss', $topic_id, $url, $title); // 's' specifies the variable type => 'string'
+    $stmt = $conn->prepare('INSERT INTO `'.$votable_name.'s` (`id`, `'.$collection_name.'_id`, `url`, `upvotes`, `title`) VALUES (NULL, ?, ?, 0, ?);');
+    $stmt->bind_param('iss', $collection_id, $url, $title); // 's' specifies the variable type => 'string'
 
     $stmt->execute();
 
-    $message = "Success! You created the topic ".$title . "<br><br>";
+    $message = "Success! You created the ".$collection_name." ".$title . "<br><br>";
 } elseif (isset($_POST['upvote'])) {
 
-    // make sure only logged in users can upvote
-    if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] == false) {
-        echo "you must be logged in to upvote";
-    } else {
+    $stmt = $conn->prepare('UPDATE `'.$votable_name.'s` SET upvotes = upvotes + 1 WHERE id = ?');
+    $stmt->bind_param('i', $_POST['upvote']); // 's' specifies the variable type => 'string'
+    $stmt->execute();
 
-        // DONE check if user has already upvoted this question
-        $stmt = $conn->prepare("SELECT * FROM `junction_explanations_users-who-voted` WHERE (`explanation_id`,`user_id`) = (?,?) ;");
-        $stmt->bind_param('ii', $_POST['upvote'], $_SESSION['id']); // 'i' specifies the variable type => 'integer'
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        // DONE if result is not empty, cancel upvote
-        if ($result->num_rows > 0) {
-            echo "you already upvoted this explanation";
-        } else {
-
-            $stmt = $conn->prepare('UPDATE explanations SET upvotes = upvotes + 1 WHERE id = ?');
-            $stmt->bind_param('i', $_POST['upvote']); // 's' specifies the variable type => 'string'
-            $stmt->execute();
-
-            // update conjunction table to only allow 1 upvote per user
-            $stmt = $conn->prepare('INSERT INTO `junction_explanations_users-who-voted` (`explanation_id`,`user_id`) VALUES (?, ?);');
-            $stmt->bind_param('ii', $_POST['upvote'], $_SESSION['id']); // 's' specifies the variable type => 'string'
-            $stmt->execute();
-
-            echo "you upvoted explanation with id ".$_POST['upvote'];
-        }
-
-    }
+    echo "you upvoted ".$votable_name." with id ".$_POST['upvote'];
 
 }
-
 
 
 // get topics ////////////////////
 
 // prepared statement to prevent SQL injection
-$stmt = $conn->prepare("SELECT `id`, `title`, `upvotes`, `url` FROM `explanations` WHERE `topic_id` = ? ;");
-$stmt->bind_param('i', $topic_id); // 'i' specifies the variable type => 'integer'
+$stmt = $conn->prepare('SELECT `id`, `title`, `upvotes`, `url` FROM `'.$votable_name.'s` WHERE `'.$collection_name.'_id` = ? ;');
+$stmt->bind_param('i', $collection_id); // 'i' specifies the variable type => 'integer'
 $stmt->execute();
+
 
 // Extract result set and loop rows
 $result = $stmt->get_result();
@@ -135,30 +104,30 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3"><a href="/index.php">Aristotle</a></h1><h1 class="h3"> >> <?php echo $_GET['title']; ?></h1>
+            <h1 class="h3"><a href="/index.php"><?php echo $platform_title; ?></a></h1><h1 class="h3"> >> <?php echo $_GET['title']; ?></h1>
         </div>
     </div>
 
 
     <div class="row">
         <div class="col">
-            <a href="#" onclick="document.getElementById('post-explanation-row').classList.remove('d-none');">post an explanation</a>
+            <a href="#" onclick="document.getElementById('post-<?=$votable_name;?>-row').classList.remove('d-none');">post a <?=$votable_name;?></a>
         </div>
     </div>
 
-    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="post-explanation-row">
+    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="post-<?=$votable_name;?>-row">
         <div class="col">
             <?php echo $message; ?>
-            Found a good explanation? Paste the URL here:<br>
+            Found a good <?=$votable_name;?>? Paste the URL here:<br>
             <form action="" method="post">
                 <input type="url" name="url"/><br>
                 <br>
                 And then the title you want to appear here:<br>
                 <input type="text" name="title"/><br>
-                <input type="submit" name="SubmitButton" value="post explanation now"/>
+                <input type="submit" name="SubmitButton" value="post <?=$votable_name;?> now"/>
             </form>
             <br>
-            <a href="#" onclick="document.getElementById('post-explanation-row').classList.add('d-none');">hide form</a>
+            <a href="#" onclick="document.getElementById('post-<?=$votable_name;?>-row').classList.add('d-none');">hide form</a>
         </div>
     </div>
 
@@ -172,10 +141,7 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
-            <a href="signup.php">sign up</a><br>
-            <a href="login.php">login</a><br>
             This is the footer<br>
-            Copyright Aristotle<br>
         </div>
     </div>
 

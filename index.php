@@ -1,19 +1,7 @@
 <?php
 
-// Initialize the session
-session_start();
 
-
-// Check if the user is logged in, if not then redirect him to login page
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-
-    echo "not logged in";
-
-    //header("location: login.php");
-    //exit;
-} else {
-        echo "logged in as ". $_SESSION["username"];
-}
+include "basic_info.php";
 
 ?>
 
@@ -28,7 +16,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
-    <title>Aristotle Home</title>
+    <title><?php echo $platform_title; ?></title>
 </head>
 <body>
 
@@ -36,10 +24,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 
 
 // let's connect to our remote database
-$servername = "localhost";
-$username = "USER353865_admin";
-$password = "iabFDQvaczRfo8T6Aa2I";
-$database = "db_353865_6";
+
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $database);
@@ -55,7 +40,7 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
     $input = $_POST['inputText']; //get input text
 
     // prepared statement to prevent SQL injection
-    $stmt = $conn->prepare('INSERT INTO `topics` (`id`, `title`) VALUES (NULL, ?);');
+    $stmt = $conn->prepare('INSERT INTO `'.$collection_name.'s` (`id`, `title`) VALUES (NULL, ?);');
     $stmt->bind_param('s', $input); // 's' specifies the variable type => 'string'
 
     $stmt->execute();
@@ -66,7 +51,7 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 
 // get topics ////////////////////
 
-$result = $conn->query("SELECT * FROM `topics`;");
+$result = $conn->query('SELECT * FROM `'.$collection_name.'s`;');
 
 if ($result->num_rows > 0) {
     $result_array = $result->fetch_all(MYSQLI_ASSOC);
@@ -83,23 +68,23 @@ $conn->close();
 
     <div class="row mt-4">
         <div class="col">
-            <h1 class="h3"><a href="#">Aristotle</a></h1><h2 class="h3"> >> Please explain _______ to me</h2>
+            <h1 class="h3"><a href="#"><?php echo $platform_title; ?></a></h1><h2 class="h3"> >> <?php echo $overview_description; ?></h2>
         </div>
     </div>
 
     <div class="row">
         <div class="col">
-            <a href="#" onclick="document.getElementById('create-topic-row').classList.remove('d-none');">create topic</a>
+            <a href="#" onclick="document.getElementById('create-<?php echo $collection_name; ?>-row').classList.remove('d-none');">create <?php echo $collection_name; ?></a>
         </div>
     </div>
 
-    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="create-topic-row">
+    <div class="row mt-3 mb-3 py-3 bg-light d-none" id="create-<?php echo $collection_name; ?>-row">
         <div class="col">
             <?php echo $message; ?>
-            Ok, let's create a new topic. Enter the title you want your topic to appear under:<br>
+            Ok, let's create a new <?php echo $collection_name; ?>. Enter the title you want your <?php echo $collection_name; ?> to appear under:<br>
             <form action="" method="post">
                 <input type="text" name="inputText"/>
-                <input type="submit" name="SubmitButton" value="create topic now"/>
+                <input type="submit" name="SubmitButton" value="create <?php echo $collection_name; ?> now"/>
             </form>
             <br>
             <a href="#" onclick="document.getElementById('create-topic-row').classList.add('d-none');">hide form</a>
@@ -149,10 +134,7 @@ $conn->close();
     <div class="row mt-5 pt-5 mb-5">
         <div class="col">
             <hr>
-            <a href="signup.php">sign up</a><br>
-            <a href="login.php">login</a><br>
             This is the footer<br>
-            Copyright Aristotle<br>
         </div>
     </div>
 
