@@ -77,7 +77,7 @@ if(isset($_POST['SubmitButton'])){ //check if form was submitted
 // get topics ////////////////////
 
 // prepared statement to prevent SQL injection
-$stmt = $conn->prepare('SELECT `id`, `title`, `upvotes`, `url` FROM `'.$votable_name.'s` WHERE `'.$collection_name.'_id` = ? ;');
+$stmt = $conn->prepare('SELECT `id`, `title`, `upvotes`, `url` FROM `'.$votable_name.'s` WHERE `'.$collection_name.'_id` = ? ORDER BY `upvotes` DESC;');
 $stmt->bind_param('i', $collection_id); // 'i' specifies the variable type => 'integer'
 $stmt->execute();
 
